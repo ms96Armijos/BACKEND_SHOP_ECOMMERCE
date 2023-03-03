@@ -2,6 +2,7 @@ const {User} = require('../models/user');
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 
 router.get('/', async (req, res) => {
@@ -45,5 +46,67 @@ router.post('/', async (req, res) => {
         res.status(200).send(user);
 });
 
+
+router.put('/:id', async (req, res) => {
+
+    const userExist = await User.findById(req.params.id);
+
+    let newPassword;
+
+    if(req.body.password){
+        newPassword = bcrypt.hashSync(req.body.password, 10);
+    }else{
+        newPassword = userExist.password;
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.params.id,
+        {
+            name: req.body.name,
+            email: req.body.email,
+            passwordHash: newPassword,
+            phone: req.body.phone,
+            isAdmin: req.body.isAdmin,
+            street: req.body.street,
+            apartment: req.body.apartment,
+            zip: req.body.zip,
+            city: req.body.city,
+            country: req.body.country,
+        },
+        {new: true}
+    );
+
+    if(!user)
+        return res.status(400).send('The user cannot be created!');
+
+        res.status(200).send(user);
+});
+
+
+
+router.post('/login', async (req, res)=> {
+    const user = await User.findOne({email: req.body.email});
+    const SECRET = process.env.SECRET;
+
+    if(!user){
+        return res.status(400).send('The user not found');
+    }
+
+    if(user && bcrypt.compareSync(req.body.password, user.passwordHash)){
+        const token = jwt.sign(
+            {
+                userId: user.id
+            },
+            SECRET,
+            {
+                expiresIn: '1d'
+            }
+            );
+            return res. status(200).send({user: user.email, token: token});
+    }else{
+        return res.status(400).send('Password is wrong');
+    }
+
+});
 
 module.exports = router;
