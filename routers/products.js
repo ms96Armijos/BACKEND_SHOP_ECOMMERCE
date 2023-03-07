@@ -39,7 +39,6 @@ router.get(`/:id`, async (req, res) => {
 
 
 router.post(`/`, async (req, res) => {
-    console.log(req.body.category)
     const category = await Category.findById(req.body.category);
 
     if(!category) return res.status(400).send('Invalid category!');
@@ -65,7 +64,7 @@ router.post(`/`, async (req, res) => {
     if(!product)
         return res.status(500).send('The product cannot be created!');
 
-        res.send(product);
+        res.status(200).send(product);
 });
 
 
