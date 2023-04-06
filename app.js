@@ -17,18 +17,21 @@ app.options('*', cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(authJwt());
+app.use('/public/uploads', express.static(__dirname + '/public/uploads'));
 app.use(errorHandler);
 
 
 const categoriesRouter = require('./routers/categories');
 const productRouter = require('./routers/products');
 const userRouter = require('./routers/user');
+const orderRouter = require('./routers/orders');
 
 
 
 app.use(`${api}/categories`,categoriesRouter );
 app.use(`${api}/products`,productRouter );
 app.use(`${api}/users`,userRouter );
+app.use(`${api}/orders`,orderRouter );
 
 
 
